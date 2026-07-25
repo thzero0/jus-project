@@ -1,0 +1,8 @@
+{
+  "name": "frontend",
+  "private": true,
+  "scripts": {
+    "lint": "echo \"lint ainda não configurado\"",
+    "test": "echo \"testes ainda não configurados\""
+  }
+}
