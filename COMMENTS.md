@@ -17,3 +17,12 @@ Backend: Golang
 
 Base de Dados: PostgreSQL
 - Embora um JSON supra as necessidades atuais, o PostgreSQL é considerado pensando na eventual continuidade do projeto, em que novas funcionalidades poderiam ser incorporadas, tirando proveito dessa base de dados.
+
+
+## Antes de integrar o Claude ao repositório (usando interface web)
+
+- **O que foi pedido:** A partir dos documentos TASKS.md, COMMENTS.md, docs/requirements.md, e C4_architecture.md gere as issues correspondentes de cada microtask. (Anexei os documentos correspondentes.)
+- **O que você aceitou como veio:** Labels sugeridas; Vite para estruturar o projeto React; 
+- **O que você alterou:** Descrições de cada issue, cortando prolixidade e caminhos "overengineering"
+- **O que você rejeitou:** Algumas issues que já haviam sido resolvidas (Como a sintese arquitetural, proteção da branch main, etc)
+
