@@ -8,6 +8,8 @@
 *.so
 *.dylib
 
+projeto.md
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -24,9 +26,18 @@ profile.cov
 go.work
 go.work.sum
 
-# env file
+# Go
+backend/bin/
+backend/api
+
+# Node
+node_modules/
+frontend/dist/
+
+# Ambiente
 .env
 
-# Editor/IDE
-# .idea/
-# .vscode/
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
