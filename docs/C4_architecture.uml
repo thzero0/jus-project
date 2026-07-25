@@ -1,0 +1,17 @@
+@startuml
+skinparam componentStyle uml2
+skinparam backgroundColor transparent
+skinparam defaultTextAlignment center
+
+actor "Usuário" as user
+
+component "Aplicação web\n(React SPA)" as web
+component "API GraphQL\n(Go)" as api
+database "PostgreSQL" as db
+
+user --> web
+
+web ..> api : «use»
+api ..> db : «use»
+
+@enduml
