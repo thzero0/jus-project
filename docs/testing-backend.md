@@ -43,7 +43,7 @@ PASS
 PASS
 ```
 
-Os `SKIP` são esperados quando `DATABASE_URL` não está setada — ver "Testando contra dados reais" abaixo.
+Os `SKIP` são esperados rodando localmente sem `DATABASE_URL` — ver "Testando contra dados reais" abaixo. No CI (`.github/workflows/ci.yml`), o job `backend` sobe um Postgres real (`services:`) e roda o seed antes do `go test`, então lá esses dois testes **rodam de verdade** em todo PR, sem `SKIP`.
 
 Lint (mesma versão do CI, `.github/workflows/ci.yml`):
 
