@@ -1,20 +1,31 @@
 .list {
   --item-height: 2.75rem;
 
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1;
+
   list-style: none;
-  margin: 0;
+  margin: 0.25rem 0 0;
   padding: 0;
   max-height: calc(10 * var(--item-height));
   overflow-y: auto;
+  background: #fff;
   border: 1px solid #ddd;
   border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .item {
   display: block;
   width: 100%;
   min-height: var(--item-height);
-  padding: 0 0.75rem;
+  /* Padding (not min-height alone) is what keeps 1-line and wrapped
+     2-line suggestions visually consistent — min-height only pads
+     unused space at the bottom of short items, never the top. */
+  padding: 0.75rem;
   border: none;
   background: none;
   font: inherit;
