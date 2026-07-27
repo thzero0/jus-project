@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchSuggestions } from './api/suggestions'
+import SuggestionList from './components/SuggestionList'
 
 const MIN_QUERY_LENGTH = 4
 const DEBOUNCE_MS = 250
@@ -11,6 +12,7 @@ function isAbortError(error: unknown): boolean {
 function App() {
   const [term, setTerm] = useState('')
   const [suggestions, setSuggestions] = useState<string[]>([])
+  const [isListOpen, setIsListOpen] = useState(false)
 
   useEffect(() => {
     if (term.length < MIN_QUERY_LENGTH) return
@@ -31,22 +33,23 @@ function App() {
     }
   }, [term])
 
-  const visibleSuggestions = term.length < MIN_QUERY_LENGTH ? [] : suggestions
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setTerm(event.target.value)
+    setIsListOpen(true)
+  }
+
+  function handleSelect(suggestion: string) {
+    setTerm(suggestion)
+    setIsListOpen(false)
+  }
+
+  const visibleSuggestions = isListOpen && term.length >= MIN_QUERY_LENGTH ? suggestions : []
 
   return (
     <main>
       <h1>Justarter</h1>
-      <input
-        type="text"
-        value={term}
-        onChange={(event) => setTerm(event.target.value)}
-        aria-label="Buscar"
-      />
-      <ul aria-label="Sugestões">
-        {visibleSuggestions.map((suggestion) => (
-          <li key={suggestion}>{suggestion}</li>
-        ))}
-      </ul>
+      <input type="text" value={term} onChange={handleChange} aria-label="Buscar" />
+      <SuggestionList suggestions={visibleSuggestions} term={term} onSelect={handleSelect} />
     </main>
   )
 }
