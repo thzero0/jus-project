@@ -30,6 +30,7 @@ services:
     build: ./backend
     environment:
       DATABASE_URL: postgres://admin:123@db:5432/games-db?sslmode=disable
+      CORS_ORIGIN: http://localhost:3000
     ports:
       - "8080:8080"
     depends_on:

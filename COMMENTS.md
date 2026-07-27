@@ -51,6 +51,22 @@ Base de Dados: PostgreSQL
 
 **Trade-off registrado:** `search()` refaz `sort.Strings` a cada chamada em vez de ordenar uma única vez no startup. Aceitável porque o dataset é pequeno e estático (10k nomes) — o custo por tecla digitada é irrelevante na prática, e a simplicidade do código pesa mais que o ganho de performance nessa escala.
 
+## Camada GraphQL: escolha de biblioteca e wiring (`backend/internal/graphql/`, `backend/cmd/main.go`)
+
+- **O que pedi ao Claude:** Implementar a camada GraphQL sobre o `SuggestionService` já existente, explicando trade-offs ao longo do caminho.
+- **O que aceitei como veio:** `gqlgen` (schema-first, geração de código, type-safe em compile-time) em vez de `graph-gophers/graphql-go` (sem codegen, erros só em runtime) — troquei segurança em compile-time pelo custo de um `go generate` a mais. Schema minimalista: uma query `suggestions(term: String!): [String!]!`, sem tipo customizado.
+- **O que alterei:** Nada diretamente — mas o Claude, testando de verdade (não só lendo o código), encontrou e corrigiu sozinho: (1) `gqlgen` mais recente exigia Go 1.25, incompatível com o 1.24 fixado no CI/`Dockerfile` — pinou `v0.17.80`, compatível com 1.24, em vez de subir a versão do projeto; (2) um campo `Resolver.Suggestions` com o mesmo nome do método gerado `Suggestions()` quebraria a chamada (Go prioriza método declarado sobre campo promovido por embedding) — renomeou pra `SuggestionService` antes de compilar; (3) um teste assumia que `"the e"` traria `"The Elder Scrolls VI"` no top 20 — rodando contra o Postgres real, falhou: dezenas de outros títulos "The Elder Scrolls ..." empurram esse pra fora do cap alfabético. O backend estava certo, o teste que errou; ajustou o prefixo pra `"the elder scrolls vi"`.
+- **O que rejeitei:** N/A.
+
+**Trade-off registrado:** GraphQL Playground montado em `/`, queries em `/graphql` — troca o placeholder "ok" por uma IDE utilizável no navegador; útil pra avaliação, seria superfície a mais pra revisar em produção real.
+
+## CORS entre `web` e `api` (`backend/cmd/main.go`, `docker-compose.yml`)
+
+- **O que pedi ao Claude:** Perguntei se faltava algo em backend + GraphQL antes de considerar essa parte pronta.
+- **O que aceitei como veio:** O Claude identificou (e confirmou testando `curl` com preflight `OPTIONS` de verdade contra o container) que `api` (porta 8080) e `web` (porta 3000) são origens diferentes pro navegador, e o servidor não mandava nenhum cabeçalho CORS — o fetch do React pro `/graphql` seria bloqueado assim que o frontend existisse. Aceitei corrigir agora, com `github.com/rs/cors` (em vez de escrever os cabeçalhos na mão — CORS tem detalhes fáceis de errar, como o `Vary` e a resposta ao preflight) restringindo a origem via env var `CORS_ORIGIN` (default `http://localhost:3000`, setada explicitamente no `docker-compose.yml`).
+- **O que alterei:** N/A.
+- **O que rejeitei:** A alternativa que o Claude também levantou — proxy reverso no nginx do `web` pro `api`, evitando CORS por completo — preferi CORS no Go mesmo, por manter o frontend sem precisar conhecer o roteamento da API.
+
 ## Escopo e organização dos testes unitários (`service_test.go` / `trie_test.go`)
 
 - **O que pedi ao Claude:** Implementar a lógica de busca de sugestões com uma interface pronta pra mock em testes.

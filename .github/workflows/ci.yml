@@ -12,12 +12,38 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: 123
+          POSTGRES_DB: games-db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U admin -d games-db"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      # Enables the integration/smoke tests (internal/repository,
+      # cmd) that are otherwise skipped without a real database — see
+      # docs/testing-backend.md.
+      DATABASE_URL: postgres://admin:123@localhost:5432/games-db?sslmode=disable
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: '1.24'
           cache-dependency-path: backend/go.sum
+      - name: Seed test database
+        env:
+          PGPASSWORD: 123
+        run: |
+          python3 db/clean_data.py db/games.csv /tmp/games.clean.csv
+          psql -h localhost -U admin -d games-db -v ON_ERROR_STOP=1 -f db/schema.sql
+          psql -h localhost -U admin -d games-db -v ON_ERROR_STOP=1 -c "\copy games(original_id, name) FROM '/tmp/games.clean.csv' WITH (FORMAT csv, HEADER true)"
       - run: go vet ./...
       - run: go test ./...
       - uses: golangci/golangci-lint-action@v7
