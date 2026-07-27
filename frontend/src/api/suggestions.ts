@@ -11,7 +11,11 @@ interface SuggestionsResponse {
   suggestions: string[]
 }
 
-export async function fetchSuggestions(term: string): Promise<string[]> {
-  const data = await graphqlClient.request<SuggestionsResponse>(SUGGESTIONS_QUERY, { term })
+export async function fetchSuggestions(term: string, signal?: AbortSignal): Promise<string[]> {
+  const data = await graphqlClient.request<SuggestionsResponse>({
+    document: SUGGESTIONS_QUERY,
+    variables: { term },
+    signal,
+  })
   return data.suggestions
 }

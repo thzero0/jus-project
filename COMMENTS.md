@@ -76,6 +76,13 @@ Base de Dados: PostgreSQL
 
 **Trade-off registrado:** o TypeScript aqui só tipa o interior dos componentes React — ainda não tem nenhuma geração de tipos a partir do `schema.graphqls`, então uma mudança no schema do backend não seria pega automaticamente pelo compilador do frontend. Fica pra quando a chamada GraphQL de verdade for implementada.
 
+## Debounce e cancelamento de requisições obsoletas (`frontend/src/App.tsx`)
+
+- **O que pedi ao Claude:** Debounce na busca — sem requisição abaixo de 4 caracteres, calibrado pra parecer instantâneo, descartando respostas obsoletas.
+- **O que aceitei como veio:** `AbortController` pra cancelar a requisição anterior quando o termo muda, em vez de um contador de sequência.
+- **O que alterei:** Editei `DEBOUNCE_MS` pra 3s pra testar visualmente e não vi diferença — o Claude explicou que eu estava olhando um container Docker com build antigo (edição em disco não atualiza imagem já buildada). Em vez de escolher entre as duas opções que ele deu (`npm run dev` ou rebuild pontual), pedi um jeito de `docker compose up` sempre refletir o código atual.
+- **O que rejeitei:** O teste automatizado que o Claude propôs pra isso (`App.debounce.test.tsx`, com fake timers) — não achei necessário.
+
 ## Escopo e organização dos testes unitários (`service_test.go` / `trie_test.go`)
 
 - **O que pedi ao Claude:** Implementar a lógica de busca de sugestões com uma interface pronta pra mock em testes.
