@@ -45,6 +45,15 @@ func TestSearch_BelowMinLengthReturnsEmpty(t *testing.T) {
 	}
 }
 
+func TestNewSuggestionService_Count(t *testing.T) {
+	games := []repository.Game{{ID: 1, Name: "Red Dead Redemption"}, {ID: 2, Name: "Reddit Simulator"}}
+	svc := newTestService(t, games)
+
+	if got := svc.Count(); got != len(games) {
+		t.Errorf("Count() = %d, want %d", got, len(games))
+	}
+}
+
 func TestSearch_CapsAt20Results(t *testing.T) {
 	games := make([]repository.Game, 0, 25)
 	for i := 0; i < 25; i++ {
