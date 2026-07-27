@@ -20,6 +20,10 @@ jobs:
           cache-dependency-path: backend/go.sum
       - run: go vet ./...
       - run: go test ./...
+      - uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.12.2
+          working-directory: backend
 
   frontend:
     runs-on: ubuntu-latest
