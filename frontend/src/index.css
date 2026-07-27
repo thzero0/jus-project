@@ -1,6 +1,29 @@
+/* latin + latin-ext (covers PT-BR accents) only — the full 500.css/700.css
+   also pull in a ~130KB Devanagari subset Rajdhani ships that we don't need. */
+@import '@fontsource/rajdhani/latin-500.css';
+@import '@fontsource/rajdhani/latin-700.css';
+@import '@fontsource/rajdhani/latin-ext-500.css';
+@import '@fontsource/rajdhani/latin-ext-700.css';
+
 :root {
-  color-scheme: light dark;
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+
+  --bg: #0a0e17;
+  --bg-glow: radial-gradient(
+    ellipse 60rem 30rem at 50% -10%,
+    rgba(168, 85, 247, 0.18),
+    transparent 60%
+  );
+  --surface: #131826;
+  --surface-hover: #1c2333;
+  --border: #2a3145;
+  --text: #e6e9f0;
+  --text-muted: #8b93a7;
+  --accent: #a855f7;
+  --accent-2: #22d3ee;
+  --accent-glow: rgba(168, 85, 247, 0.45);
+
+  font-family: 'Rajdhani', system-ui, 'Segoe UI', Roboto, sans-serif;
 }
 
 *,
@@ -11,4 +34,18 @@
 
 body {
   margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg);
+  /* Layered back to front: purple glow (unchanged) → a flat, uniform dark
+     tint over the whole image (not a radial fade — that read as a blob in
+     the middle) → the game-cover collage, faint throughout. */
+  background-image:
+    var(--bg-glow),
+    linear-gradient(rgba(10, 14, 23, 0.82), rgba(10, 14, 23, 0.82)),
+    url('./assets/background.jpg');
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position: center, center, center;
+  background-size: auto, auto, cover;
+  background-attachment: scroll, scroll, fixed;
+  color: var(--text);
 }

@@ -17,7 +17,7 @@ function SuggestionList({ suggestions, term, onSelect }: SuggestionListProps) {
       {suggestions.map((suggestion) => (
         <li key={suggestion}>
           <button type="button" className={styles.item} onClick={() => onSelect(suggestion)}>
-            <strong>{suggestion.slice(0, term.length)}</strong>
+            <strong className={styles.match}>{suggestion.slice(0, term.length)}</strong>
             {suggestion.slice(term.length)}
           </button>
         </li>
