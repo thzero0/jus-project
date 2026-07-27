@@ -48,13 +48,14 @@ function App() {
 
   return (
     <main className={styles.app}>
-      <h1>Justarter</h1>
+      <h1 className={styles.title}>Justarter</h1>
       <div className={styles.searchContainer}>
         <input
           type="text"
           value={term}
           onChange={handleChange}
           aria-label="Buscar"
+          placeholder="Buscar jogo..."
           className={styles.input}
         />
         <SuggestionList suggestions={visibleSuggestions} term={term} onSelect={handleSelect} />
