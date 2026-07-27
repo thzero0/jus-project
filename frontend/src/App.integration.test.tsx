@@ -16,7 +16,7 @@ describe.skipIf(process.env.RUN_INTEGRATION_TESTS !== '1')(
       fireEvent.change(input, { target: { value: 'minecraf' } })
 
       await waitFor(() => {
-        expect(screen.getByText('Minecraft')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Minecraft' })).toBeInTheDocument()
       })
     })
   },
