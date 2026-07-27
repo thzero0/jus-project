@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import App from './App'
+import App from '../App'
 
 // Exercises the real GraphQL client against a running `docker compose up`
 // stack — see docs/testing-backend.md for how the backend gets seeded.
