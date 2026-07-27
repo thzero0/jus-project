@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS games (
+    id   SERIAL PRIMARY KEY,
+    original_id INT UNIQUE NOT NULL,
+    name TEXT NOT NULL
+);
