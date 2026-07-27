@@ -67,6 +67,15 @@ Base de Dados: PostgreSQL
 - **O que alterei:** N/A.
 - **O que rejeitei:** A alternativa que o Claude também levantou — proxy reverso no nginx do `web` pro `api`, evitando CORS por completo — preferi CORS no Go mesmo, por manter o frontend sem precisar conhecer o roteamento da API.
 
+## Setup do frontend React (`frontend/`)
+
+- **O que pedi ao Claude:** Implementar só o setup do projeto React, sem a busca ainda.
+- **O que aceitei como veio:** TypeScript (Vite já tinha sido decidido antes) pela tipagem em compile-time, consistente com o rigor do backend em Go. ESLint em vez do `oxlint`, que o `create-vite` mais recente já traz por padrão — preferi o padrão mais estabelecido, que qualquer revisor reconhece de cara. Vitest + Testing Library pro `npm test`, com só um smoke test de renderização por ora.
+- **O que alterei:** N/A.
+- **O que rejeitei:** N/A.
+
+**Trade-off registrado:** o TypeScript aqui só tipa o interior dos componentes React — ainda não tem nenhuma geração de tipos a partir do `schema.graphqls`, então uma mudança no schema do backend não seria pega automaticamente pelo compilador do frontend. Fica pra quando a chamada GraphQL de verdade for implementada.
+
 ## Escopo e organização dos testes unitários (`service_test.go` / `trie_test.go`)
 
 - **O que pedi ao Claude:** Implementar a lógica de busca de sugestões com uma interface pronta pra mock em testes.
