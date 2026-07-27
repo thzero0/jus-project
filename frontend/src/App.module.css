@@ -1,0 +1,18 @@
+.app {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.searchContainer {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  /* >=16px keeps iOS Safari from auto-zooming the page on focus */
+  font-size: 1rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}

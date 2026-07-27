@@ -83,6 +83,13 @@ Base de Dados: PostgreSQL
 - **O que alterei:** Editei `DEBOUNCE_MS` pra 3s pra testar visualmente e não vi diferença — o Claude explicou que eu estava olhando um container Docker com build antigo (edição em disco não atualiza imagem já buildada). Em vez de escolher entre as duas opções que ele deu (`npm run dev` ou rebuild pontual), pedi um jeito de `docker compose up` sempre refletir o código atual.
 - **O que rejeitei:** O teste automatizado que o Claude propôs pra isso (`App.debounce.test.tsx`, com fake timers) — não achei necessário.
 
+## Responsividade mobile (`frontend/src/App.module.css`, `SuggestionList.module.css`)
+
+- **O que pedi ao Claude:** Campo de busca e lista exibidos corretamente em telas pequenas, testado num viewport de dispositivo móvel real.
+- **O que aceitei como veio:** A lista virou um dropdown ancorado (`position: absolute` sob o campo) em vez de empurrar o resto da página — evita o layout "pulando" quando a lista abre/fecha, o que importa ainda mais com o teclado virtual ocupando parte da tela.
+- **O que alterei:** N/A — mas o Claude errou e precisou ser corrigido: a primeira tentativa de alinhar verticalmente o texto dos itens usou `display: flex`, que quebrou o negrito e o resto do texto em colunas separadas em vez de fluir como texto normal. Só apareceu testando de verdade num viewport estreito (títulos longos quebram em duas linhas com mais frequência ali) — não teria aparecido só lendo o CSS. O Claude trocou por padding vertical simétrico, que resolve sem mexer no fluxo do texto.
+- **O que rejeitei:** N/A.
+
 ## Escopo e organização dos testes unitários (`service_test.go` / `trie_test.go`)
 
 - **O que pedi ao Claude:** Implementar a lógica de busca de sugestões com uma interface pronta pra mock em testes.

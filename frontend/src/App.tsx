@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fetchSuggestions } from './api/suggestions'
 import SuggestionList from './components/SuggestionList'
+import styles from './App.module.css'
 
 const MIN_QUERY_LENGTH = 4
 const DEBOUNCE_MS = 250
@@ -46,10 +47,18 @@ function App() {
   const visibleSuggestions = isListOpen && term.length >= MIN_QUERY_LENGTH ? suggestions : []
 
   return (
-    <main>
+    <main className={styles.app}>
       <h1>Justarter</h1>
-      <input type="text" value={term} onChange={handleChange} aria-label="Buscar" />
-      <SuggestionList suggestions={visibleSuggestions} term={term} onSelect={handleSelect} />
+      <div className={styles.searchContainer}>
+        <input
+          type="text"
+          value={term}
+          onChange={handleChange}
+          aria-label="Buscar"
+          className={styles.input}
+        />
+        <SuggestionList suggestions={visibleSuggestions} term={term} onSelect={handleSelect} />
+      </div>
     </main>
   )
 }
