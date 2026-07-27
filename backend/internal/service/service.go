@@ -18,7 +18,8 @@ const (
 // from a repository.Repository at startup and queried in memory from then
 // on.
 type SuggestionService struct {
-	trie *trie
+	trie  *trie
+	count int
 }
 
 func NewSuggestionService(ctx context.Context, repo repository.Repository) (*SuggestionService, error) {
@@ -32,7 +33,12 @@ func NewSuggestionService(ctx context.Context, repo repository.Repository) (*Sug
 		t.insert(g.Name)
 	}
 
-	return &SuggestionService{trie: t}, nil
+	return &SuggestionService{trie: t, count: len(games)}, nil
+}
+
+// Count returns how many games were loaded from the repository at startup.
+func (s *SuggestionService) Count() int {
+	return s.count
 }
 
 // Search returns up to 20 game names starting with term. It returns an
