@@ -74,7 +74,11 @@ Flags úteis: `-cover` (cobertura), `-run TestTrieSearch` (roda um subconjunto),
 - confirma a contagem de jogos carregados após a limpeza/deduplicação do seed (8978)
 - confirma que um jogo conhecido do dataset (`"The Elder Scrolls VI"`) está presente
 
-**`main_test.go`** (`cmd`) — smoke test do binário como um todo: builda `cmd/main.go`, roda o binário como subprocesso de verdade (não em-processo, já que `main()` bloqueia em `ListenAndServe` e chama `log.Fatal` em erro), aponta pra uma porta livre via a env var `PORT`, espera o servidor responder e valida o corpo de `GET /`. É o único teste que exercita o processo inteiro — parsing de env, conexão com o banco, wiring do `SuggestionService`, servidor HTTP.
+**`main_test.go`** (`cmd`) — smoke test do binário como um todo: builda `cmd/main.go`, roda o binário como subprocesso de verdade (não em-processo, já que `main()` bloqueia em `ListenAndServe` e chama `log.Fatal` em erro), aponta pra uma porta livre via a env var `PORT`, espera o servidor responder, e faz uma query GraphQL de verdade em `POST /graphql`. É o único teste que exercita o processo inteiro — parsing de env, conexão com o banco, wiring do `SuggestionService`, e a camada GraphQL — de ponta a ponta.
+
+**`resolver_test.go`** (`internal/graphql`) — testa só a tradução GraphQL → `SuggestionService`, com `fakeRepository` (sem Postgres, sem HTTP, roda em milissegundos):
+- `ReturnsMatches` — `resolver.Query().Suggestions(ctx, term)` delega pro `Search()` do serviço e devolve o resultado
+- `BelowMinLengthReturnsEmpty` — a regra de tamanho mínimo continua valendo passando pelo resolver
 
 ## Testando contra dados reais
 
@@ -103,6 +107,37 @@ docker compose logs api
 - Regras de negócio: monte um serviço com `newTestService(t, games)` passando um `[]repository.Game` fake, chame `svc.Search(termo)`.
 - Contra Postgres real ou subprocesso do binário: siga o padrão de `postgres_integration_test.go`/`main_test.go` — `t.Skip` se `DATABASE_URL` não estiver setada, pra não quebrar `go test ./...` sem banco disponível.
 
-## Ainda não coberto
+## Testando a camada GraphQL manualmente
 
-- `internal/graphql`: não implementado — sem código, sem teste.
+Com `docker compose up` (ou só `db seed api`) rodando:
+
+**Playground (navegador)** — abra `http://localhost:8080/`, uma IDE de GraphQL onde dá pra escrever a query, ver o schema (aba "Docs") e rodar direto:
+
+```graphql
+query {
+  suggestions(term: "minecraf")
+}
+```
+
+**curl** — o endpoint de queries é `POST /graphql`, corpo JSON com `query` e (opcional) `variables`:
+
+```bash
+curl -s http://localhost:8080/graphql \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"query($t: String!) { suggestions(term: $t) }","variables":{"t":"minecraf"}}'
+```
+
+```json
+{"data":{"suggestions":["Minecraft","Minecraft: Pocket Edition","Minecraft: Story Mode","Minecraft: Story Mode — Season Two"]}}
+```
+
+Vale testar também os dois requisitos que vivem no `service` mas se manifestam pelo GraphQL: termo com menos de 4 caracteres (`"min"`) deve devolver `"suggestions":[]`; termo sem nenhum jogo correspondente (`"zzzz"`) também.
+
+**CORS** — confere que a origem do `web` (`http://localhost:3000` por padrão, configurável via `CORS_ORIGIN`) recebe `Access-Control-Allow-Origin`, e que outras origens não recebem:
+
+```bash
+curl -s -i -X OPTIONS http://localhost:8080/graphql \
+  -H 'Origin: http://localhost:3000' \
+  -H 'Access-Control-Request-Method: POST' \
+  -H 'Access-Control-Request-Headers: content-type' | grep -i access-control
+```

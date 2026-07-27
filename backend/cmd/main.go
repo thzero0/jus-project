@@ -2,11 +2,16 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/rs/cors"
+
+	graphqlapi "jus-project/backend/internal/graphql"
+	"jus-project/backend/internal/graphql/generated"
 	"jus-project/backend/internal/repository"
 	"jus-project/backend/internal/service"
 )
@@ -29,9 +34,21 @@ func main() {
 	}
 	log.Printf("suggestion service ready: %d games loaded", svc.Count())
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = fmt.Fprintln(w, "ok")
-	})
+	resolver := graphqlapi.NewResolver(svc)
+	schema := generated.NewExecutableSchema(generated.Config{Resolvers: resolver})
+
+	corsOrigin := os.Getenv("CORS_ORIGIN")
+	if corsOrigin == "" {
+		corsOrigin = "http://localhost:3000"
+	}
+	graphqlHandler := cors.New(cors.Options{
+		AllowedOrigins: []string{corsOrigin},
+		AllowedMethods: []string{http.MethodPost},
+		AllowedHeaders: []string{"Content-Type"},
+	}).Handler(handler.NewDefaultServer(schema))
+
+	http.Handle("/graphql", graphqlHandler)
+	http.Handle("/", playground.Handler("GraphQL Playground", "/graphql"))
 
 	port := os.Getenv("PORT")
 	if port == "" {

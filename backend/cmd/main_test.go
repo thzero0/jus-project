@@ -1,21 +1,24 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 	"net"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"testing"
 	"time"
 )
 
 // TestMain_ServesHTTP is a smoke test for the compiled binary: it builds
 // cmd/main.go, runs it as a real subprocess against a live database, and
-// checks that it actually starts listening and serves HTTP. This is the
-// only test that exercises the process as a whole (env parsing, DB
-// connection, service wiring, HTTP server) rather than individual pieces.
+// sends a real GraphQL query over HTTP. This is the only test that
+// exercises the process as a whole — env parsing, DB connection, service
+// wiring, and the GraphQL layer together — rather than individual pieces.
 //
 // It requires DATABASE_URL to point at a running, seeded database — see
 // docs/testing-backend.md. It is skipped when DATABASE_URL is unset, so
@@ -45,15 +48,53 @@ func TestMain_ServesHTTP(t *testing.T) {
 		_ = cmd.Wait()
 	})
 
-	resp := waitForServer(t, "http://127.0.0.1:"+port+"/", 5*time.Second)
+	baseURL := "http://127.0.0.1:" + port
+	readyResp := waitForServer(t, baseURL+"/", 5*time.Second)
+	_ = readyResp.Body.Close()
+
+	// "the elder scrolls vi" (not just "the e") deliberately narrows to a
+	// single, known match: dozens of other "The Elder Scrolls ..." titles
+	// exist in the dataset, and alphabetical sort (':' sorts before 'I')
+	// pushes "The Elder Scrolls VI" past the 20-result cap for a shorter
+	// prefix like "the e".
+	const term = "the elder scrolls vi"
+	reqBody, err := json.Marshal(map[string]any{
+		"query":     `query($term: String!) { suggestions(term: $term) }`,
+		"variables": map[string]any{"term": term},
+	})
+	if err != nil {
+		t.Fatalf("marshaling GraphQL request: %v", err)
+	}
+
+	resp, err := http.Post(baseURL+"/graphql", "application/json", bytes.NewReader(reqBody))
+	if err != nil {
+		t.Fatalf("POST /graphql: %v", err)
+	}
 	defer func() { _ = resp.Body.Close() }()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("reading response body: %v", err)
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		t.Fatalf("POST /graphql status = %d, body = %s", resp.StatusCode, body)
 	}
-	if got, want := string(body), "ok\n"; got != want {
-		t.Errorf("GET / body = %q, want %q", got, want)
+
+	var result struct {
+		Data struct {
+			Suggestions []string `json:"suggestions"`
+		} `json:"data"`
+		Errors []struct {
+			Message string `json:"message"`
+		} `json:"errors"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		t.Fatalf("decoding GraphQL response: %v", err)
+	}
+	if len(result.Errors) > 0 {
+		t.Fatalf("GraphQL errors: %v", result.Errors)
+	}
+
+	want := []string{"The Elder Scrolls VI"}
+	if !slices.Equal(result.Data.Suggestions, want) {
+		t.Errorf("suggestions(term: %q) = %v, want %v", term, result.Data.Suggestions, want)
 	}
 }
 

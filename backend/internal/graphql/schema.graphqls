@@ -1,0 +1,8 @@
+type Query {
+  """
+  Game names starting with term (case-insensitive), ordered alphabetically.
+  Empty when term is shorter than 4 characters or has no matches — the
+  minimum-length and 20-result cap rules live in internal/service, not here.
+  """
+  suggestions(term: String!): [String!]!
+}
