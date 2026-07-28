@@ -19,6 +19,18 @@ Base de Dados: PostgreSQL
 - Embora um JSON supra as necessidades atuais, o PostgreSQL é considerado pensando na eventual continuidade do projeto, em que novas funcionalidades poderiam ser incorporadas, tirando proveito dessa base de dados.
 
 
+## Avaliação do `starter/suggestions.js`
+
+O que eu manteria: a checagem de 4 caracteres antes de qualquer request, mesma lógica que usarei no cliente (antes do debounce) e no servidor (Como uma medida denfensiva e redundante).
+
+O que eu faria diferente:
+- O código não usa GraphQL na prática - `fetch('/graphql?q=...')` é um REST "disfarçado". Servidor GraphQL na realidade espera `{query, variables}`, não um `q` solto na URL. Por isso usaria um cliente de verdade (`graphql-request`) mandando a query certa pro schema.
+- Não há cancelamento de requisição. Respostas antiga podem chegar depois da nova e sobrescrever a tela com dado velho.
+- Não há debounce, cada tecla dispara uma requisição ao backend, como o app é leve não impacta tanto. Colocaria um debounce rápido o suficiente pra parecer instantâneo, mas que evite as multiplas requisições ao digitar rápido.
+- A parte de `.slice(0, 10)` descarta os itens 11-20 pra sempre, isso quebraria o requisito de scroll. Faria o corte ser visual (CSS), não na lógica de busca.
+
+O que eu mudaria antes de produção: Não existe tratamento de erro nenhum, se o fetch falhar, a resposta não for OK, ou o corpo não for o JSON esperado, a UI quebra sem nenhum tipo de "feedback".
+
 ## Antes de integrar o Claude ao repositório (usando interface web)
 
 - **O que pedi ao Claude:** A partir dos documentos TASKS.md, COMMENTS.md, docs/requirements.md e C4_architecture.md, gerar as issues correspondentes a cada microtask (anexei os documentos).
