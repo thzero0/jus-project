@@ -56,11 +56,21 @@ npm install
 npm run dev    # usa VITE_GRAPHQL_URL de .env (default: localhost:8080/graphql)
 ```
 
+## Variáveis de ambiente
+
+| Variável | Onde | Default | Descrição |
+|---|---|---|---|
+| `DATABASE_URL` | backend | *(obrigatória)* | String de conexão do Postgres. Já setada em `docker-compose.yml` pro serviço `api`. |
+| `CORS_ORIGIN` | backend | `http://localhost:3000` | Origem liberada pelo CORS do GraphQL — precisa ser a URL de onde o `web` é servido. |
+| `PORT` | backend | `8080` | Porta HTTP do servidor GraphQL. |
+| `VITE_GRAPHQL_URL` | frontend | `http://localhost:8080/graphql` (via `frontend/.env`) | Endpoint que o front chama. Embutida no build (Vite) — quem faz a requisição é o navegador, não o container, então precisa ser um endereço alcançável de fora do Docker. No build da imagem é setada via `ARG` (ver `frontend/Dockerfile`/`docker-compose.yml`). |
+
 ## Testes
 
 ```bash
 # backend
-cd backend && go vet ./... && go test ./...
+cd backend && go vet ./... && go test ./... && golangci-lint run ./...
+# sem golangci-lint instalado: docker run --rm -v $(pwd)/..:/repo -w /repo/backend golangci/golangci-lint:v2.12.2 golangci-lint run ./...
 
 # frontend
 cd frontend && npm run lint && npm test && npm run build
