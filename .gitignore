@@ -36,6 +36,9 @@ frontend/dist/
 
 # Ambiente
 .env
+# frontend/.env não é segredo — é o default público de VITE_GRAPHQL_URL,
+# necessário pro build funcionar num clone limpo.
+!frontend/.env
 
 # Editor / SO
 .vscode/
